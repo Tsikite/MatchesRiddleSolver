@@ -4,7 +4,7 @@
 
 Command line input:
 
-C:\Users\yurmant\source\repos\MatchesRiddleSolver\bin\Release\net8.0>MatchesRiddleSolver.exe 10+11+12+13=14
+MatchesRiddleSolver.exe 10+11+12+13=14
 
 OUTPUT:
 
