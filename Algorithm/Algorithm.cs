@@ -52,6 +52,39 @@ internal class Algorithm
         }
     }
 
+    public static void TryConditionalGiveAndReceiveElements(List<ElementBase<string>> elements)
+    {
+        for (int giverIndex = 0; giverIndex < elements.Count; giverIndex++)
+        {
+            if (elements[giverIndex] is ISingleMatchConditionalGiver<string> conditionalGiver)
+            {
+                var originalGiverElement = elements[giverIndex];
+
+                for (int receiverIndex = 0; receiverIndex < elements.Count; receiverIndex++)
+                {
+                    if (giverIndex == receiverIndex) // This is covered in TrySelfExchangeElements
+                        continue;
+
+                    if (elements[receiverIndex] is ISingleMatchReceiver<string> receiver)
+                    {
+                        var originalReceiverElement = elements[receiverIndex];
+
+                        var possibleElementsPairs = conditionalGiver.Give(originalReceiverElement);
+
+                        foreach (var possibleElementsPair in possibleElementsPairs)
+                        {
+                            elements[giverIndex] = possibleElementsPair.Item1;
+                            elements[receiverIndex] = possibleElementsPair.Item2;
+                            Calculate(elements);
+                            elements[receiverIndex] = originalReceiverElement;
+                            elements[giverIndex] = originalGiverElement;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public static void TryGiveAndReceiveElements(List<ElementBase<string>> elements)
     {
         // The following iteration is a Log(n)*Log(n)

@@ -16,3 +16,4 @@ var elements = Factory.FromString(args1[1]);
 Algorithm.Calculate(elements);
 Algorithm.TrySelfExchangeElements(elements);
 Algorithm.TryGiveAndReceiveElements(elements);
+Algorithm.TryConditionalGiveAndReceiveElements(elements);

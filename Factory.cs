@@ -22,7 +22,12 @@ internal class Factory
     public static List<ElementBase<string>> FromString(string math)
     {
         var elements = new List<ElementBase<string>>();
+        
         var mathArray = math.ToCharArray();
+        
+        if(char.IsDigit(mathArray[0]))
+            elements.Add(new OperatorAddHidden());
+
         foreach (var t in mathArray)
         {
             if (char.IsDigit(t))
