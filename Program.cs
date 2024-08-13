@@ -1,19 +1,72 @@
 ﻿using MatchesRiddleSolver;
-using MatchesRiddleSolver.Algorithm;
+using MatchesRiddleSolver.CommandLine;
+using MatchesRiddleSolver.Utils;
+using Action = MatchesRiddleSolver.Action;
 
-// Get command line arguments
-string[] args1 = Environment.GetCommandLineArgs();
+CommandLineManager.ParseCommandLine(args);
 
-// Check if the user has provided a riddle
-if (args1.Length < 2)
+CancellationTokenSource cts = new CancellationTokenSource(Config.Instance.Timeout);
+
+async Task SolveRiddleAsync()
 {
-    Console.WriteLine("Please provide a riddle.");
-    return;
+    var elements = Factory.FromString(Config.Instance.Riddle);
+
+    await Task.Run(() =>
+    {
+        var solutions = elements.FindSolutions(cts.Token);
+
+        Console.WriteLine($"Found {solutions.Count} solutions.");
+
+        foreach (var solution in solutions)
+            Console.WriteLine(solution);
+    });
 }
 
-var elements = Factory.FromString(args1[1]);
+async Task FindRiddlesAsync()
+{
+    await Task.Run(() =>
+    {
+        var (template, numbers) = Utils.GetStringFormat(Config.Instance.Riddle);
 
-Algorithm.Calculate(elements);
-Algorithm.TrySelfExchangeElements(elements);
-Algorithm.TryGiveAndReceiveElements(elements);
-Algorithm.TryConditionalGiveAndReceiveElements(elements);
+        Console.WriteLine($"Start searching for {Config.Instance.Timeout}");
+
+        var token = cts.Token;
+        while (token.IsCancellationRequested == false)
+        {
+            // Format the template with the numbers
+            var input = string.Format(template, numbers.Select(a => (object)a).ToArray());
+
+            var elements = Factory.FromString(input);
+
+            var found = elements.FindSolutions(token);
+
+            if (found.Count > 0)
+                Console.WriteLine(input + $" ({found.Count})");
+
+            numbers[^1]++;
+        }
+    });
+}
+
+try
+{
+    var action = Config.Instance.Action;
+
+    switch (action)
+    {
+        case Action.SolveRiddle:
+            await SolveRiddleAsync();
+            break;
+        case Action.FindRiddles:
+            await FindRiddlesAsync();
+            break;
+        case null:
+            break;
+        default:
+            throw new ArgumentOutOfRangeException();
+    }
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+}
